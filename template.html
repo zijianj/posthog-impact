@@ -51,7 +51,7 @@
   /* top 5 */
   .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:stretch}
   .eng{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
-    padding:11px;display:flex;flex-direction:column;gap:7px;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden}
+    padding:10px;display:flex;flex-direction:column;gap:6px;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden}
   .eng:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(16,18,28,.10)}
   .eng .rk{position:absolute;top:10px;right:11px;font-size:12px;font-weight:800;color:var(--muted)}
   .who{display:flex;gap:9px;align-items:center}
@@ -64,17 +64,19 @@
   .scoreline .big{font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .scoreline .of{font-size:12px;color:var(--muted)}
   .scoreline .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-left:auto;font-weight:600}
-  .bars{display:flex;flex-direction:column;gap:5px}
+  .blurb{font-size:11px;line-height:1.36;color:#3a4150}
+  .blurb b{color:var(--ink);font-weight:700}
+  .bars{display:flex;flex-direction:column;gap:4px}
   .bar{display:grid;grid-template-columns:14px 1fr 26px;align-items:center;gap:7px}
   .bar .bi{font-size:10px;color:var(--muted);font-weight:700}
-  .track{height:7px;background:#efede9;border-radius:5px;overflow:hidden}
+  .track{height:6px;background:#efede9;border-radius:5px;overflow:hidden}
   .fill{height:100%;border-radius:5px;transition:width .4s cubic-bezier(.4,0,.2,1)}
   .bar .bv{font-size:11px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
   .stats{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:1px}
   .stat{font-size:11px;color:var(--muted);background:#f4f2ee;border-radius:6px;padding:3px 6px;white-space:nowrap}
   .stat b{color:var(--ink);font-variant-numeric:tabular-nums}
-  .prs{border-top:1px dashed var(--line);padding-top:7px;display:flex;flex-direction:column;gap:4px;margin-top:auto}
-  .prs .pl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .prs{border-top:1px dashed var(--line);padding-top:5px;display:flex;flex-direction:column;gap:3px;margin-top:auto}
+  .prs .pl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:1px}
   .prs a{font-size:11.5px;color:var(--ink);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .prs a:hover{color:var(--accent)}
   /* extended ranking */
@@ -104,9 +106,9 @@
 <div class="wrap">
   <header>
     <div>
-      <h1>Who moves PostHog forward<span class="dot">?</span></h1>
-      <div class="sub">The 5 most impactful engineers over the last 90 days — measured not by volume, but by
-        whether their work <b>ships</b>, <b>lifts the team</b>, and <b>the team depends on it</b>.</div>
+      <h1>Who makes PostHog move faster<span class="dot">?</span></h1>
+      <div class="sub">The 5 engineers driving the most <b>organizational velocity</b> over the last 90 days — scored on the
+        <b>reach</b> of their work, how much they <b>accelerate others</b>, and how they <b>connect separate teams</b> — not output volume.</div>
     </div>
     <div class="meta" id="meta"></div>
   </header>
@@ -131,9 +133,9 @@
   <div class="card pad rest">
     <p class="ttl">Full ranking · #6 and beyond <span style="font-weight:400;text-transform:none;letter-spacing:0">(bar = pillar composition)</span></p>
     <div class="legend-mini">
-      <span><i style="background:var(--ship)"></i>Shipping</span>
+      <span><i style="background:var(--ship)"></i>Reach</span>
       <span><i style="background:var(--lev)"></i>Leverage</span>
-      <span><i style="background:var(--inf)"></i>Influence</span>
+      <span><i style="background:var(--inf)"></i>Connection</span>
     </div>
     <div id="rest"></div>
   </div>
@@ -144,19 +146,19 @@
 <script>
 const DATA = __DATA__;
 const PILLARS=[
-  {key:'shipping',name:'Shipping',color:'var(--ship)',w:0.35,
-   q:'Do they reliably land meaningful work?',
-   m:'merged PRs (65%) + active weeks (35%)'},
-  {key:'leverage',name:'Leverage',color:'var(--lev)',w:0.35,
-   q:'Do they multiply the team?',
-   m:'PRs reviewed for others (60%) + distinct teammates helped (40%)'},
-  {key:'influence',name:'Influence',color:'var(--inf)',w:0.30,
-   q:'Does the team depend on them?',
-   m:'distinct collaborators (55%) + review engagement their PRs attract (45%)'},
+  {key:'reach',abbr:'R',name:'Reach',color:'var(--ship)',w:0.30,
+   q:'How broadly does their work land?',
+   m:'distinct subsystems they ship into (60%) + merged PRs (40%)'},
+  {key:'leverage',abbr:'L',name:'Leverage',color:'var(--lev)',w:0.35,
+   q:'How much do they accelerate others?',
+   m:'review influence — changes-requested › commented › approved (60%) + teammates helped (40%)'},
+  {key:'connection',abbr:'C',name:'Connection',color:'var(--inf)',w:0.35,
+   q:'Do they bridge separate teams?',
+   m:'subsystems reviewed across (40%) + cross-area collaborators (30%) + network betweenness (30%)'},
 ];
-const PCOLOR={shipping:'#2f6fed',leverage:'#16a34a',influence:'#8b3df5'};
-const COLORS=['#f54e00','#2f6fed','#16a34a','#8b3df5','#0ea5e9','#e11d48','#d97706','#7c3aed'];
-let weights={shipping:0.35,leverage:0.35,influence:0.30};
+const PCOLOR={reach:'#2f6fed',leverage:'#16a34a',connection:'#8b3df5'};
+const DEFAULT_W={reach:0.30,leverage:0.35,connection:0.35};
+let weights={...DEFAULT_W};
 
 const ghUser=l=>`https://github.com/${l}`;
 const ghPR=n=>`https://github.com/${DATA.meta.repo}/pull/${n}`;
@@ -164,10 +166,8 @@ const avatar=l=>`https://github.com/${l}.png?size=96`;
 const initials=l=>l.replace(/[^a-zA-Z0-9]/g,'').slice(0,2).toUpperCase();
 const colorFor=l=>{let h=0;for(const c of l)h=(h*31+c.charCodeAt(0))>>>0;return `hsl(${h%360} 55% 55%)`;};
 
-function finalScore(e){
-  const s=weights.shipping+weights.leverage+weights.influence||1;
-  return (weights.shipping*e.shipping+weights.leverage*e.leverage+weights.influence*e.influence)/s;
-}
+const wsum=()=>PILLARS.reduce((a,p)=>a+weights[p.key],0)||1;
+function finalScore(e){const s=wsum();return PILLARS.reduce((a,p)=>a+weights[p.key]*e[p.key],0)/s;}
 function ranked(){
   return DATA.leaderboard.map(e=>({...e,_f:finalScore(e)}))
     .sort((a,b)=>b._f-a._f).map((e,i)=>({...e,_rank:i+1}));
@@ -181,6 +181,7 @@ function meta(){
     `<span class="chip">📦 <b>${m.repo}</b></span>`+
     `<span class="chip">🗓 last <b>${m.window_days}</b> days · ${fmt(start)}–${fmt(d)}</span>`+
     `<span class="chip">🔀 <b>${m.total_merged_prs.toLocaleString()}</b> merged PRs</span>`+
+    `<span class="chip">🗂 <b>${m.total_subsystems}</b> subsystems</span>`+
     `<span class="chip">🧑‍💻 <b>${m.total_engineers}</b> engineers</span>`;
 }
 
@@ -192,7 +193,7 @@ function pillarsUI(){
       <div class="ds"><b>${p.q}</b><br>${p.m}</div>
     </div>`).join('');
   document.querySelectorAll('.pill').forEach(el=>el.onclick=()=>{
-    const k=el.dataset.k; weights={shipping:0,leverage:0,influence:0}; weights[k]=1;
+    const k=el.dataset.k; PILLARS.forEach(p=>weights[p.key]=0); weights[k]=1;
     syncSliders(); render();
   });
 }
@@ -210,18 +211,15 @@ function slidersUI(){
 function syncSliders(){
   document.querySelectorAll('#sliders input').forEach(inp=>inp.value=weights[inp.dataset.k]*100);
 }
-function pct(){
-  const s=weights.shipping+weights.leverage+weights.influence||1;
-  return {shipping:Math.round(weights.shipping/s*100),leverage:Math.round(weights.leverage/s*100),influence:Math.round(weights.influence/s*100)};
-}
+function pct(){const s=wsum();const o={};PILLARS.forEach(p=>o[p.key]=Math.round(weights[p.key]/s*100));return o;}
 
 function card(e){
-  const p=pct();
-  const contrib=`${p.shipping}%·${e.shipping.toFixed(0)} + ${p.leverage}%·${e.leverage.toFixed(0)} + ${p.influence}%·${e.influence.toFixed(0)}`;
-  const m=e.metrics;
-  const bar=(k,nm)=>`<div class="bar"><span class="bi" style="color:${PCOLOR[k]}">${nm}</span>
-    <div class="track"><div class="fill" style="width:${e[k]}%;background:${PCOLOR[k]}"></div></div>
-    <span class="bv">${e[k].toFixed(0)}</span></div>`;
+  const p=pct(), m=e.metrics;
+  const contrib=PILLARS.map(pl=>`${p[pl.key]}%·${e[pl.key].toFixed(0)}`).join(' + ');
+  const bars=PILLARS.map(pl=>`<div class="bar"><span class="bi" style="color:${PCOLOR[pl.key]}">${pl.abbr}</span>
+    <div class="track"><div class="fill" style="width:${e[pl.key]}%;background:${PCOLOR[pl.key]}"></div></div>
+    <span class="bv">${e[pl.key].toFixed(0)}</span></div>`).join('');
+  const chg=m.changes_requested>=3?` · <b>${m.changes_requested}</b> chg-req`:'';
   const prs=(e.rep_prs||[]).slice(0,2).map(r=>
     `<a href="${ghPR(r.number)}" target="_blank" title="${r.title.replace(/"/g,'&quot;')} · ${r.reviews} reviews, ${r.comments} comments">#${r.number} ${r.title}</a>`).join('');
   return `<div class="eng">
@@ -233,20 +231,20 @@ function card(e){
     </div>
     <div class="scoreline" title="weighted: ${contrib}">
       <span class="big" style="color:var(--accent)">${e._f.toFixed(0)}</span><span class="of">/100</span>
-      <span class="lbl">impact</span>
+      <span class="lbl">velocity impact</span>
     </div>
-    <div class="bars">${bar('shipping','S')}${bar('leverage','L')}${bar('influence','I')}</div>
+    <div class="blurb">${e.blurb}</div>
+    <div class="bars">${bars}</div>
     <div class="stats">
-      <span class="stat"><b>${m.merged_prs}</b> PRs · <b>${m.active_weeks}</b>w</span>
-      <span class="stat"><b>${m.reviews_given}</b> reviews → <b>${m.authors_helped}</b> ppl</span>
-      <span class="stat"><b>${m.collaborators}</b> collaborators</span>
+      <span class="stat">🚀 <b>${m.merged_prs}</b> PRs · <b>${m.areas_authored}</b> subsystems</span>
+      <span class="stat">🤝 <b>${m.reviews_given}</b> reviews → <b>${m.authors_helped}</b> ppl${chg}</span>
+      <span class="stat">🧭 <b>${m.cross_area_collaborators}</b> cross-area · top <b>${Math.max(1,100-e.betweenness_pct)}%</b> bridge</span>
     </div>
-    <div class="prs"><span class="pl">shipped, by engagement</span>${prs}</div>
   </div>`;
 }
 
 function restRow(e){
-  const tot=Math.max(e.shipping*weights.shipping+e.leverage*weights.leverage+e.influence*weights.influence,0.001);
+  const tot=Math.max(PILLARS.reduce((a,pl)=>a+e[pl.key]*weights[pl.key],0),0.001);
   const seg=(k)=>`<span style="width:${(e[k]*weights[k]/tot*100)}%;background:${PCOLOR[k]}"></span>`;
   return `<div class="rrow">
     <span class="rn">${e._rank}</span>
@@ -254,7 +252,7 @@ function restRow(e){
       <img class="av2" src="${avatar(e.login)}" alt="" onerror="this.style.visibility='hidden'">
       <a class="nm" href="${ghUser(e.login)}" target="_blank">${e.login}</a>
     </div>
-    <div class="compbar" title="S ${e.shipping.toFixed(0)} · L ${e.leverage.toFixed(0)} · I ${e.influence.toFixed(0)}">${seg('shipping')}${seg('leverage')}${seg('influence')}</div>
+    <div class="compbar" title="R ${e.reach.toFixed(0)} · L ${e.leverage.toFixed(0)} · C ${e.connection.toFixed(0)}">${PILLARS.map(pl=>seg(pl.key)).join('')}</div>
     <span class="sc">${e._f.toFixed(0)}</span>
   </div>`;
 }
@@ -263,20 +261,20 @@ function footer(){
   const m=DATA.meta;
   document.getElementById('foot').innerHTML=`
     <details><summary>Methodology &amp; how to validate these numbers</summary>
-    <div style="margin-top:8px;max-width:900px">
+    <div style="margin-top:8px;max-width:940px">
     <b>Data.</b> Every pull request <b>merged into <code>${m.repo}</code> in the last ${m.window_days} days</b>
-    (${m.total_merged_prs.toLocaleString()} PRs), pulled from the GitHub GraphQL API with their full review graph.
-    Automated accounts (bots) are excluded. ${m.total_engineers} human engineers authored or reviewed merged work.<br><br>
-    <b>The three pillars.</b> Each engineer gets a 0–100 score in each pillar, where <b>100 = the strongest engineer in
-    that dimension</b> (every raw number is shown on the card so you can check it):<br>
-    • <b style="color:var(--ship)">Shipping</b> = merged PRs (65%) + distinct active weeks (35%) — landing real work, consistently.<br>
-    • <b style="color:var(--lev)">Leverage</b> = PRs they reviewed for others (60%) + distinct teammates helped (40%) — unblocking the team.<br>
-    • <b style="color:var(--inf)">Influence</b> = distinct review collaborators (55%) + review engagement their PRs attract (45%) — being depended on.<br><br>
-    <b>Impact score</b> = weighted blend of the three (default 35/35/30). Collaboration (Leverage+Influence) is weighted 65%
-    on purpose — to reward force-multipliers, not just prolific committers. <b>Lines of code are never scored</b>; they are a poor
-    proxy for impact. Use the sliders above to apply your own weighting and see how stable the top 5 is.<br><br>
-    <b>Honest limits.</b> Review/PR activity captures collaboration that happens <i>on GitHub</i>; deep design work, incident
-    response, and mentorship that lives in Slack/docs/Linear won't fully show up. Treat this as a strong, validatable
+    (${m.total_merged_prs.toLocaleString()} PRs) — with file paths and the full review graph — via the GitHub GraphQL API.
+    Bots and AI agents are excluded (one AI reviewer alone left 2,689 reviews). ${m.total_engineers} human engineers across
+    ${m.total_subsystems} subsystems (a subsystem ≈ top-level dir, with <code>frontend/src</code> split one level deeper).<br><br>
+    <b>Three pillars</b> — each a 0–100 score where <b>100 = the strongest engineer in that dimension</b> (raw numbers shown on every card):<br>
+    • <b style="color:var(--ship)">Reach</b> = distinct subsystems they ship into (60%) + merged PRs (40%) — <i>how broadly their work lands</i>.<br>
+    • <b style="color:var(--lev)">Leverage</b> = review influence, weighting changes-requested › commented › approved (60%) + distinct teammates helped (40%) — <i>how much they accelerate others</i>.<br>
+    • <b style="color:var(--inf)">Connection</b> = subsystems they review across (40%) + collaborators whose home subsystem differs from theirs (30%) + <span class="tip" title="Brandes betweenness centrality on the review-collaboration graph: high = sits on the shortest paths linking otherwise-separate groups">network betweenness (30%)</span> — <i>whether they bridge separate teams</i>.<br><br>
+    <b>Velocity-impact score</b> = weighted blend (default 30 / 35 / 35). Collaboration (Leverage + Connection = 70%) outweighs
+    individual output on purpose — the question is who makes <i>the org</i> move faster, not who commits most. <b>Lines of code are
+    never scored.</b> Drag the sliders to apply your own weighting and see how stable the top 5 is.<br><br>
+    <b>Honest limits.</b> This captures collaboration visible <i>on GitHub</i>; design, incident response, and mentorship in
+    Slack/Linear/docs won't fully show. "Subsystems touched" can over-credit wide-but-shallow changes. A strong, validatable
     starting point for a conversation — not a verdict.
     </div></details>`;
 }
@@ -289,7 +287,7 @@ function render(){
   document.getElementById('top5').innerHTML=r.slice(0,5).map(card).join('');
   document.getElementById('rest').innerHTML=r.slice(5,13).map(restRow).join('');
 }
-document.getElementById('reset').onclick=()=>{weights={shipping:0.35,leverage:0.35,influence:0.30};syncSliders();render();};
+document.getElementById('reset').onclick=()=>{weights={...DEFAULT_W};syncSliders();render();};
 
 meta();pillarsUI();slidersUI();footer();render();
 </script>

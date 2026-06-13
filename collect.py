@@ -10,7 +10,7 @@ from datetime import date, timedelta, datetime
 
 REPO = "posthog/posthog"
 DAYS = 90
-WINDOW_DAYS = 7          # 7d * ~94 merged/day ~= 658 < 1000 search cap
+WINDOW_DAYS = 5          # 5d * ~94 merged/day ~= 470 < 1000 search cap (safe margin)
 PAGE = 50
 GQL_URL = "https://api.github.com/graphql"
 
@@ -49,6 +49,7 @@ query($q: String!, $cursor: String) {
           totalCount
           nodes { author { login } state }
         }
+        files(first: 30) { nodes { path } }
       }
     }
   }
