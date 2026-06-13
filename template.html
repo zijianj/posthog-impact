@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PostHog Engineering Impact · Last 90 Days</title>
+<style>
+  :root{
+    --bg:#f7f6f3; --panel:#ffffff; --ink:#1d1f27; --muted:#6b7280; --line:#e7e5e1;
+    --ship:#2f6fed; --lev:#16a34a; --inf:#8b3df5; --accent:#f54e00;
+    --shadow:0 1px 2px rgba(16,18,28,.04),0 6px 18px rgba(16,18,28,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1380px;margin:0 auto;padding:10px 20px 12px}
+  /* header */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  h1{font-size:23px;margin:0;letter-spacing:-.02em}
+  h1 .dot{color:var(--accent)}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:3px;max-width:760px}
+  .meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:4px 10px;font-size:12px;color:var(--muted);white-space:nowrap}
+  .chip b{color:var(--ink);font-variant-numeric:tabular-nums}
+  /* controls strip */
+  .strip{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;margin:9px 0 9px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .pad{padding:9px 14px}
+  .ttl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:0 0 9px}
+  .pillars{display:flex;gap:8px}
+  .pill{flex:1;border:1px solid var(--line);border-radius:11px;padding:9px 10px;cursor:pointer;
+    transition:transform .08s,box-shadow .12s,border-color .12s;position:relative}
+  .pill:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .pill .nm{font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px}
+  .pill .nm i{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .pill .ds{color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.35}
+  .pill .wt{position:absolute;top:8px;right:9px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .sliders{display:flex;flex-direction:column;gap:7px}
+  .srow{display:grid;grid-template-columns:78px 1fr 38px;align-items:center;gap:9px}
+  .srow label{font-size:12px;font-weight:600}
+  .srow output{font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px}
+  .ctlfoot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .hint{font-size:11.5px;color:var(--muted)}
+  .btn{font-size:12px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  /* top 5 */
+  .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:stretch}
+  .eng{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+    padding:11px;display:flex;flex-direction:column;gap:7px;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden}
+  .eng:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(16,18,28,.10)}
+  .eng .rk{position:absolute;top:10px;right:11px;font-size:12px;font-weight:800;color:var(--muted)}
+  .who{display:flex;gap:9px;align-items:center}
+  .av{width:42px;height:42px;border-radius:11px;background:#eee;flex:none;object-fit:cover;border:1px solid var(--line)}
+  .avf{width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#fff;font-size:16px}
+  .who .nm{font-weight:700;font-size:14.5px;line-height:1.1}
+  .who .ar{font-size:11.5px;color:var(--accent);font-weight:600;margin-top:2px}
+  .scoreline{display:flex;align-items:baseline;gap:6px;border-top:1px dashed var(--line);padding-top:8px}
+  .scoreline .big{font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .scoreline .of{font-size:12px;color:var(--muted)}
+  .scoreline .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-left:auto;font-weight:600}
+  .bars{display:flex;flex-direction:column;gap:5px}
+  .bar{display:grid;grid-template-columns:14px 1fr 26px;align-items:center;gap:7px}
+  .bar .bi{font-size:10px;color:var(--muted);font-weight:700}
+  .track{height:7px;background:#efede9;border-radius:5px;overflow:hidden}
+  .fill{height:100%;border-radius:5px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .bar .bv{font-size:11px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  .stats{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:1px}
+  .stat{font-size:11px;color:var(--muted);background:#f4f2ee;border-radius:6px;padding:3px 6px;white-space:nowrap}
+  .stat b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .prs{border-top:1px dashed var(--line);padding-top:7px;display:flex;flex-direction:column;gap:4px;margin-top:auto}
+  .prs .pl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .prs a{font-size:11.5px;color:var(--ink);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .prs a:hover{color:var(--accent)}
+  /* extended ranking */
+  .rest{margin-top:9px}
+  #rest{display:grid;grid-template-columns:1fr 1fr;column-gap:26px;row-gap:0}
+  .rrow{display:grid;grid-template-columns:26px 140px 1fr 50px;align-items:center;gap:10px;
+    padding:3px 8px;border-radius:9px;cursor:default}
+  .rrow:hover{background:#fff}
+  .rrow .rn{color:var(--muted);font-weight:700;font-size:12px;text-align:right}
+  .rrow .who2{display:flex;align-items:center;gap:7px;min-width:0}
+  .rrow .who2 .nm{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rrow .av2{width:22px;height:22px;border-radius:6px;flex:none}
+  .compbar{height:13px;border-radius:5px;overflow:hidden;display:flex;background:#efede9}
+  .compbar span{height:100%}
+  .rrow .sc{font-weight:800;text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+  .legend-mini{display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted);margin:2px 0 8px}
+  .legend-mini i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px}
+  footer{margin-top:9px;color:var(--muted);font-size:11.5px;line-height:1.6}
+  footer b{color:var(--ink)}
+  .tip{cursor:help;border-bottom:1px dotted var(--muted)}
+  details summary{cursor:pointer;font-weight:600;color:var(--ink)}
+  @media(max-width:1180px){.grid5{grid-template-columns:repeat(3,1fr)}.strip{grid-template-columns:1fr}}
+  @media(max-width:760px){.grid5{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Who moves PostHog forward<span class="dot">?</span></h1>
+      <div class="sub">The 5 most impactful engineers over the last 90 days — measured not by volume, but by
+        whether their work <b>ships</b>, <b>lifts the team</b>, and <b>the team depends on it</b>.</div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="strip">
+    <div class="card pad">
+      <p class="ttl">How impact is measured · click a pillar to rank by it alone</p>
+      <div class="pillars" id="pillars"></div>
+    </div>
+    <div class="card pad">
+      <p class="ttl">Weight the pillars to your values — the board re-ranks live</p>
+      <div class="sliders" id="sliders"></div>
+      <div class="ctlfoot">
+        <span class="hint">Default 35 / 35 / 30. Drag to test how robust the ranking is.</span>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid5" id="top5"></div>
+
+  <div class="card pad rest">
+    <p class="ttl">Full ranking · #6 and beyond <span style="font-weight:400;text-transform:none;letter-spacing:0">(bar = pillar composition)</span></p>
+    <div class="legend-mini">
+      <span><i style="background:var(--ship)"></i>Shipping</span>
+      <span><i style="background:var(--lev)"></i>Leverage</span>
+      <span><i style="background:var(--inf)"></i>Influence</span>
+    </div>
+    <div id="rest"></div>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const DATA = __DATA__;
+const PILLARS=[
+  {key:'shipping',name:'Shipping',color:'var(--ship)',w:0.35,
+   q:'Do they reliably land meaningful work?',
+   m:'merged PRs (65%) + active weeks (35%)'},
+  {key:'leverage',name:'Leverage',color:'var(--lev)',w:0.35,
+   q:'Do they multiply the team?',
+   m:'PRs reviewed for others (60%) + distinct teammates helped (40%)'},
+  {key:'influence',name:'Influence',color:'var(--inf)',w:0.30,
+   q:'Does the team depend on them?',
+   m:'distinct collaborators (55%) + review engagement their PRs attract (45%)'},
+];
+const PCOLOR={shipping:'#2f6fed',leverage:'#16a34a',influence:'#8b3df5'};
+const COLORS=['#f54e00','#2f6fed','#16a34a','#8b3df5','#0ea5e9','#e11d48','#d97706','#7c3aed'];
+let weights={shipping:0.35,leverage:0.35,influence:0.30};
+
+const ghUser=l=>`https://github.com/${l}`;
+const ghPR=n=>`https://github.com/${DATA.meta.repo}/pull/${n}`;
+const avatar=l=>`https://github.com/${l}.png?size=96`;
+const initials=l=>l.replace(/[^a-zA-Z0-9]/g,'').slice(0,2).toUpperCase();
+const colorFor=l=>{let h=0;for(const c of l)h=(h*31+c.charCodeAt(0))>>>0;return `hsl(${h%360} 55% 55%)`;};
+
+function finalScore(e){
+  const s=weights.shipping+weights.leverage+weights.influence||1;
+  return (weights.shipping*e.shipping+weights.leverage*e.leverage+weights.influence*e.influence)/s;
+}
+function ranked(){
+  return DATA.leaderboard.map(e=>({...e,_f:finalScore(e)}))
+    .sort((a,b)=>b._f-a._f).map((e,i)=>({...e,_rank:i+1}));
+}
+
+function meta(){
+  const m=DATA.meta, d=new Date(m.collected_at);
+  const fmt=t=>new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const start=new Date(d); start.setDate(start.getDate()-m.window_days);
+  document.getElementById('meta').innerHTML=
+    `<span class="chip">📦 <b>${m.repo}</b></span>`+
+    `<span class="chip">🗓 last <b>${m.window_days}</b> days · ${fmt(start)}–${fmt(d)}</span>`+
+    `<span class="chip">🔀 <b>${m.total_merged_prs.toLocaleString()}</b> merged PRs</span>`+
+    `<span class="chip">🧑‍💻 <b>${m.total_engineers}</b> engineers</span>`;
+}
+
+function pillarsUI(){
+  document.getElementById('pillars').innerHTML=PILLARS.map(p=>`
+    <div class="pill" data-k="${p.key}" title="Scored from: ${p.m}">
+      <span class="wt" id="wt-${p.key}"></span>
+      <div class="nm"><i style="background:${p.color}"></i>${p.name}</div>
+      <div class="ds"><b>${p.q}</b><br>${p.m}</div>
+    </div>`).join('');
+  document.querySelectorAll('.pill').forEach(el=>el.onclick=()=>{
+    const k=el.dataset.k; weights={shipping:0,leverage:0,influence:0}; weights[k]=1;
+    syncSliders(); render();
+  });
+}
+function slidersUI(){
+  document.getElementById('sliders').innerHTML=PILLARS.map(p=>`
+    <div class="srow">
+      <label><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${p.color};margin-right:5px"></i>${p.name}</label>
+      <input type="range" min="0" max="100" value="${p.w*100}" data-k="${p.key}">
+      <output id="o-${p.key}"></output>
+    </div>`).join('');
+  document.querySelectorAll('#sliders input').forEach(inp=>inp.oninput=()=>{
+    weights[inp.dataset.k]=+inp.value/100; render();
+  });
+}
+function syncSliders(){
+  document.querySelectorAll('#sliders input').forEach(inp=>inp.value=weights[inp.dataset.k]*100);
+}
+function pct(){
+  const s=weights.shipping+weights.leverage+weights.influence||1;
+  return {shipping:Math.round(weights.shipping/s*100),leverage:Math.round(weights.leverage/s*100),influence:Math.round(weights.influence/s*100)};
+}
+
+function card(e){
+  const p=pct();
+  const contrib=`${p.shipping}%·${e.shipping.toFixed(0)} + ${p.leverage}%·${e.leverage.toFixed(0)} + ${p.influence}%·${e.influence.toFixed(0)}`;
+  const m=e.metrics;
+  const bar=(k,nm)=>`<div class="bar"><span class="bi" style="color:${PCOLOR[k]}">${nm}</span>
+    <div class="track"><div class="fill" style="width:${e[k]}%;background:${PCOLOR[k]}"></div></div>
+    <span class="bv">${e[k].toFixed(0)}</span></div>`;
+  const prs=(e.rep_prs||[]).slice(0,2).map(r=>
+    `<a href="${ghPR(r.number)}" target="_blank" title="${r.title.replace(/"/g,'&quot;')} · ${r.reviews} reviews, ${r.comments} comments">#${r.number} ${r.title}</a>`).join('');
+  return `<div class="eng">
+    <span class="rk">#${e._rank}</span>
+    <div class="who">
+      <img class="av" src="${avatar(e.login)}" alt="" onerror="this.outerHTML='<div class=&quot;avf&quot; style=&quot;background:${colorFor(e.login)}&quot;>${initials(e.login)}</div>'">
+      <div><a class="nm" href="${ghUser(e.login)}" target="_blank">${e.login}</a>
+      <div class="ar">${e.archetype}</div></div>
+    </div>
+    <div class="scoreline" title="weighted: ${contrib}">
+      <span class="big" style="color:var(--accent)">${e._f.toFixed(0)}</span><span class="of">/100</span>
+      <span class="lbl">impact</span>
+    </div>
+    <div class="bars">${bar('shipping','S')}${bar('leverage','L')}${bar('influence','I')}</div>
+    <div class="stats">
+      <span class="stat"><b>${m.merged_prs}</b> PRs · <b>${m.active_weeks}</b>w</span>
+      <span class="stat"><b>${m.reviews_given}</b> reviews → <b>${m.authors_helped}</b> ppl</span>
+      <span class="stat"><b>${m.collaborators}</b> collaborators</span>
+    </div>
+    <div class="prs"><span class="pl">shipped, by engagement</span>${prs}</div>
+  </div>`;
+}
+
+function restRow(e){
+  const tot=Math.max(e.shipping*weights.shipping+e.leverage*weights.leverage+e.influence*weights.influence,0.001);
+  const seg=(k)=>`<span style="width:${(e[k]*weights[k]/tot*100)}%;background:${PCOLOR[k]}"></span>`;
+  return `<div class="rrow">
+    <span class="rn">${e._rank}</span>
+    <div class="who2">
+      <img class="av2" src="${avatar(e.login)}" alt="" onerror="this.style.visibility='hidden'">
+      <a class="nm" href="${ghUser(e.login)}" target="_blank">${e.login}</a>
+    </div>
+    <div class="compbar" title="S ${e.shipping.toFixed(0)} · L ${e.leverage.toFixed(0)} · I ${e.influence.toFixed(0)}">${seg('shipping')}${seg('leverage')}${seg('influence')}</div>
+    <span class="sc">${e._f.toFixed(0)}</span>
+  </div>`;
+}
+
+function footer(){
+  const m=DATA.meta;
+  document.getElementById('foot').innerHTML=`
+    <details><summary>Methodology &amp; how to validate these numbers</summary>
+    <div style="margin-top:8px;max-width:900px">
+    <b>Data.</b> Every pull request <b>merged into <code>${m.repo}</code> in the last ${m.window_days} days</b>
+    (${m.total_merged_prs.toLocaleString()} PRs), pulled from the GitHub GraphQL API with their full review graph.
+    Automated accounts (bots) are excluded. ${m.total_engineers} human engineers authored or reviewed merged work.<br><br>
+    <b>The three pillars.</b> Each engineer gets a 0–100 score in each pillar, where <b>100 = the strongest engineer in
+    that dimension</b> (every raw number is shown on the card so you can check it):<br>
+    • <b style="color:var(--ship)">Shipping</b> = merged PRs (65%) + distinct active weeks (35%) — landing real work, consistently.<br>
+    • <b style="color:var(--lev)">Leverage</b> = PRs they reviewed for others (60%) + distinct teammates helped (40%) — unblocking the team.<br>
+    • <b style="color:var(--inf)">Influence</b> = distinct review collaborators (55%) + review engagement their PRs attract (45%) — being depended on.<br><br>
+    <b>Impact score</b> = weighted blend of the three (default 35/35/30). Collaboration (Leverage+Influence) is weighted 65%
+    on purpose — to reward force-multipliers, not just prolific committers. <b>Lines of code are never scored</b>; they are a poor
+    proxy for impact. Use the sliders above to apply your own weighting and see how stable the top 5 is.<br><br>
+    <b>Honest limits.</b> Review/PR activity captures collaboration that happens <i>on GitHub</i>; deep design work, incident
+    response, and mentorship that lives in Slack/docs/Linear won't fully show up. Treat this as a strong, validatable
+    starting point for a conversation — not a verdict.
+    </div></details>`;
+}
+
+function render(){
+  const r=ranked();
+  const p=pct();
+  PILLARS.forEach(x=>{document.getElementById('wt-'+x.key).textContent=p[x.key]+'%';
+                      document.getElementById('o-'+x.key).textContent=p[x.key]+'%';});
+  document.getElementById('top5').innerHTML=r.slice(0,5).map(card).join('');
+  document.getElementById('rest').innerHTML=r.slice(5,13).map(restRow).join('');
+}
+document.getElementById('reset').onclick=()=>{weights={shipping:0.35,leverage:0.35,influence:0.30};syncSliders();render();};
+
+meta();pillarsUI();slidersUI();footer();render();
+</script>
+</body>
+</html>

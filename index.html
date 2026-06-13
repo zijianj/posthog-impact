@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PostHog Engineering Impact · Last 90 Days</title>
+<style>
+  :root{
+    --bg:#f7f6f3; --panel:#ffffff; --ink:#1d1f27; --muted:#6b7280; --line:#e7e5e1;
+    --ship:#2f6fed; --lev:#16a34a; --inf:#8b3df5; --accent:#f54e00;
+    --shadow:0 1px 2px rgba(16,18,28,.04),0 6px 18px rgba(16,18,28,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1380px;margin:0 auto;padding:10px 20px 12px}
+  /* header */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  h1{font-size:23px;margin:0;letter-spacing:-.02em}
+  h1 .dot{color:var(--accent)}
+  .sub{color:var(--muted);font-size:13.5px;margin-top:3px;max-width:760px}
+  .meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;
+    padding:4px 10px;font-size:12px;color:var(--muted);white-space:nowrap}
+  .chip b{color:var(--ink);font-variant-numeric:tabular-nums}
+  /* controls strip */
+  .strip{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;margin:9px 0 9px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  .pad{padding:9px 14px}
+  .ttl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:0 0 9px}
+  .pillars{display:flex;gap:8px}
+  .pill{flex:1;border:1px solid var(--line);border-radius:11px;padding:9px 10px;cursor:pointer;
+    transition:transform .08s,box-shadow .12s,border-color .12s;position:relative}
+  .pill:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .pill .nm{font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px}
+  .pill .nm i{width:9px;height:9px;border-radius:3px;display:inline-block}
+  .pill .ds{color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.35}
+  .pill .wt{position:absolute;top:8px;right:9px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .sliders{display:flex;flex-direction:column;gap:7px}
+  .srow{display:grid;grid-template-columns:78px 1fr 38px;align-items:center;gap:9px}
+  .srow label{font-size:12px;font-weight:600}
+  .srow output{font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;accent-color:var(--accent);height:4px}
+  .ctlfoot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .hint{font-size:11.5px;color:var(--muted)}
+  .btn{font-size:12px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  /* top 5 */
+  .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:stretch}
+  .eng{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);
+    padding:11px;display:flex;flex-direction:column;gap:7px;transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden}
+  .eng:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(16,18,28,.10)}
+  .eng .rk{position:absolute;top:10px;right:11px;font-size:12px;font-weight:800;color:var(--muted)}
+  .who{display:flex;gap:9px;align-items:center}
+  .av{width:42px;height:42px;border-radius:11px;background:#eee;flex:none;object-fit:cover;border:1px solid var(--line)}
+  .avf{width:42px;height:42px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#fff;font-size:16px}
+  .who .nm{font-weight:700;font-size:14.5px;line-height:1.1}
+  .who .ar{font-size:11.5px;color:var(--accent);font-weight:600;margin-top:2px}
+  .scoreline{display:flex;align-items:baseline;gap:6px;border-top:1px dashed var(--line);padding-top:8px}
+  .scoreline .big{font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .scoreline .of{font-size:12px;color:var(--muted)}
+  .scoreline .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-left:auto;font-weight:600}
+  .bars{display:flex;flex-direction:column;gap:5px}
+  .bar{display:grid;grid-template-columns:14px 1fr 26px;align-items:center;gap:7px}
+  .bar .bi{font-size:10px;color:var(--muted);font-weight:700}
+  .track{height:7px;background:#efede9;border-radius:5px;overflow:hidden}
+  .fill{height:100%;border-radius:5px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+  .bar .bv{font-size:11px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  .stats{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:1px}
+  .stat{font-size:11px;color:var(--muted);background:#f4f2ee;border-radius:6px;padding:3px 6px;white-space:nowrap}
+  .stat b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .prs{border-top:1px dashed var(--line);padding-top:7px;display:flex;flex-direction:column;gap:4px;margin-top:auto}
+  .prs .pl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .prs a{font-size:11.5px;color:var(--ink);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .prs a:hover{color:var(--accent)}
+  /* extended ranking */
+  .rest{margin-top:9px}
+  #rest{display:grid;grid-template-columns:1fr 1fr;column-gap:26px;row-gap:0}
+  .rrow{display:grid;grid-template-columns:26px 140px 1fr 50px;align-items:center;gap:10px;
+    padding:3px 8px;border-radius:9px;cursor:default}
+  .rrow:hover{background:#fff}
+  .rrow .rn{color:var(--muted);font-weight:700;font-size:12px;text-align:right}
+  .rrow .who2{display:flex;align-items:center;gap:7px;min-width:0}
+  .rrow .who2 .nm{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rrow .av2{width:22px;height:22px;border-radius:6px;flex:none}
+  .compbar{height:13px;border-radius:5px;overflow:hidden;display:flex;background:#efede9}
+  .compbar span{height:100%}
+  .rrow .sc{font-weight:800;text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+  .legend-mini{display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted);margin:2px 0 8px}
+  .legend-mini i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:-1px}
+  footer{margin-top:9px;color:var(--muted);font-size:11.5px;line-height:1.6}
+  footer b{color:var(--ink)}
+  .tip{cursor:help;border-bottom:1px dotted var(--muted)}
+  details summary{cursor:pointer;font-weight:600;color:var(--ink)}
+  @media(max-width:1180px){.grid5{grid-template-columns:repeat(3,1fr)}.strip{grid-template-columns:1fr}}
+  @media(max-width:760px){.grid5{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Who moves PostHog forward<span class="dot">?</span></h1>
+      <div class="sub">The 5 most impactful engineers over the last 90 days — measured not by volume, but by
+        whether their work <b>ships</b>, <b>lifts the team</b>, and <b>the team depends on it</b>.</div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="strip">
+    <div class="card pad">
+      <p class="ttl">How impact is measured · click a pillar to rank by it alone</p>
+      <div class="pillars" id="pillars"></div>
+    </div>
+    <div class="card pad">
+      <p class="ttl">Weight the pillars to your values — the board re-ranks live</p>
+      <div class="sliders" id="sliders"></div>
+      <div class="ctlfoot">
+        <span class="hint">Default 35 / 35 / 30. Drag to test how robust the ranking is.</span>
+        <button class="btn" id="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid5" id="top5"></div>
+
+  <div class="card pad rest">
+    <p class="ttl">Full ranking · #6 and beyond <span style="font-weight:400;text-transform:none;letter-spacing:0">(bar = pillar composition)</span></p>
+    <div class="legend-mini">
+      <span><i style="background:var(--ship)"></i>Shipping</span>
+      <span><i style="background:var(--lev)"></i>Leverage</span>
+      <span><i style="background:var(--inf)"></i>Influence</span>
+    </div>
+    <div id="rest"></div>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const DATA = {"meta": {"repo": "posthog/posthog", "collected_at": "2026-06-13T07:10:29.939389Z", "window_days": 90, "total_merged_prs": 8430, "total_engineers": 199, "weights": {"shipping": 0.35, "leverage": 0.35, "influence": 0.3}}, "leaderboard": [{"rank": 1, "login": "pauldambra", "archetype": "The Shipper", "shipping": 100.0, "leverage": 57.3, "influence": 89.1, "impact": 81.8, "metrics": {"merged_prs": 466, "active_weeks": 14, "reviews_given": 150, "authors_helped": 50, "collaborators": 70, "reviews_received": 299, "reviewers_distinct": 50, "discussion_received": 2910, "additions": 82125, "deletions": 25784, "changed_files": 2883}, "rep_prs": [{"number": 58605, "title": "feat(user-interviews): semantic search across interview responses", "reviews": 41, "comments": 19}, {"number": 58415, "title": "feat(user-interviews): add per-interviewee context rows + CSV-aware skill", "reviews": 19, "comments": 34}, {"number": 60812, "title": "feat(replay): pin a primary property from the session replay inspector", "reviews": 39, "comments": 9}]}, {"rank": 2, "login": "Gilbert09", "archetype": "The Connector", "shipping": 72.8, "leverage": 60.1, "influence": 81.7, "impact": 71.0, "metrics": {"merged_prs": 307, "active_weeks": 12, "reviews_given": 184, "authors_helped": 44, "collaborators": 48, "reviews_received": 378, "reviewers_distinct": 17, "discussion_received": 1183, "additions": 150717, "deletions": 11090, "changed_files": 2294}, "rep_prs": [{"number": 61146, "title": "feat(data-warehouse): implement active_campaign import source", "reviews": 20, "comments": 15}, {"number": 62495, "title": "feat(data-warehouse): one-shot MCP source setup, connect-link, and import nudges", "reviews": 13, "comments": 14}, {"number": 61143, "title": "feat(data-warehouse): implement servicenow import source", "reviews": 13, "comments": 12}]}, {"rank": 3, "login": "gantoine", "archetype": "The Force Multiplier", "shipping": 40.0, "leverage": 100.0, "influence": 66.5, "impact": 69.0, "metrics": {"merged_prs": 72, "active_weeks": 12, "reviews_given": 323, "authors_helped": 68, "collaborators": 72, "reviews_received": 97, "reviewers_distinct": 15, "discussion_received": 282, "additions": 38851, "deletions": 28245, "changed_files": 1088}, "rep_prs": [{"number": 58185, "title": "chore(deps): upgrade typescript to 6.0", "reviews": 4, "comments": 14}, {"number": 51784, "title": "feat(phrocs): Publish phrocs on homebrew", "reviews": 12, "comments": 4}, {"number": 58176, "title": "chore(devex): compile tailwind through bundler in dev and prod", "reviews": 5, "comments": 9}]}, {"rank": 4, "login": "webjunkie", "archetype": "The Connector", "shipping": 65.1, "leverage": 58.7, "influence": 83.2, "impact": 68.3, "metrics": {"merged_prs": 234, "active_weeks": 13, "reviews_given": 167, "authors_helped": 47, "collaborators": 64, "reviews_received": 288, "reviewers_distinct": 40, "discussion_received": 1035, "additions": 210827, "deletions": 130680, "changed_files": 8537}, "rep_prs": [{"number": 24707, "title": "chore(deps): Upgrade Django 5 try 2", "reviews": 5, "comments": 28}, {"number": 52408, "title": "feat(models): add fail-closed TeamScopedManager for tenant isolation", "reviews": 20, "comments": 10}, {"number": 45696, "title": "chore(dev): consolidate env vars, auto-resolve 1Password secrets", "reviews": 14, "comments": 14}]}, {"rank": 5, "login": "rnegron", "archetype": "The Force Multiplier", "shipping": 60.8, "leverage": 67.1, "influence": 65.4, "impact": 64.4, "metrics": {"merged_prs": 203, "active_weeks": 13, "reviews_given": 228, "authors_helped": 42, "collaborators": 52, "reviews_received": 216, "reviewers_distinct": 30, "discussion_received": 772, "additions": 40680, "deletions": 10486, "changed_files": 1272}, "rep_prs": [{"number": 59440, "title": "chore(python): bump to 3.13.13", "reviews": 6, "comments": 53}, {"number": 51686, "title": "refactor(hogli): restructure as standalone package in tools/hogli (v2)", "reviews": 5, "comments": 12}, {"number": 55998, "title": "fix(stamphog): allow no-op migrations", "reviews": 8, "comments": 8}]}, {"rank": 6, "login": "andrewm4894", "archetype": "The Connector", "shipping": 60.7, "leverage": 49.4, "influence": 63.9, "impact": 57.7, "metrics": {"merged_prs": 220, "active_weeks": 12, "reviews_given": 149, "authors_helped": 37, "collaborators": 49, "reviews_received": 222, "reviewers_distinct": 33, "discussion_received": 1183, "additions": 115681, "deletions": 7202, "changed_files": 1640}, "rep_prs": [{"number": 57759, "title": "feat(signals): scout fleet + per-scout scheduling (5/7)", "reviews": 102, "comments": 62}, {"number": 57760, "title": "feat(signals): hardening + canonical sync (6/7)", "reviews": 55, "comments": 96}, {"number": 57757, "title": "feat(signals): headless scout backend (3/7)", "reviews": 78, "comments": 42}]}, {"rank": 7, "login": "rafaeelaudibert", "archetype": "The Connector", "shipping": 44.8, "leverage": 60.2, "influence": 62.2, "impact": 55.4, "metrics": {"merged_prs": 106, "active_weeks": 12, "reviews_given": 191, "authors_helped": 42, "collaborators": 53, "reviews_received": 182, "reviewers_distinct": 28, "discussion_received": 620, "additions": 36858, "deletions": 19892, "changed_files": 1508}, "rep_prs": [{"number": 52324, "title": "feat: Add OAuth Client ID Metadata Document (CIMD) support", "reviews": 24, "comments": 12}, {"number": 49572, "title": "feat: Connect Stripe via OAuth in data warehouse", "reviews": 23, "comments": 10}, {"number": 59126, "title": "feat(mcp): add in-app MCP hint toasts and empty-state cards with opt-out setting", "reviews": 18, "comments": 13}]}, {"rank": 8, "login": "skoob13", "archetype": "The Shipper", "shipping": 54.5, "leverage": 54.1, "influence": 53.8, "impact": 54.1, "metrics": {"merged_prs": 158, "active_weeks": 13, "reviews_given": 177, "authors_helped": 36, "collaborators": 43, "reviews_received": 176, "reviewers_distinct": 20, "discussion_received": 559, "additions": 86086, "deletions": 21327, "changed_files": 1784}, "rep_prs": [{"number": 60884, "title": "feat(posthog-ai): backend sandbox foundations bundle", "reviews": 11, "comments": 6}, {"number": 55539, "title": "chore(mcp): migrate trends and funnel evals", "reviews": 4, "comments": 12}, {"number": 56636, "title": "fix(mcp): use rag endpoint for inkeep docs", "reviews": 8, "comments": 7}]}, {"rank": 9, "login": "sampennington", "archetype": "The Shipper", "shipping": 78.9, "leverage": 38.9, "influence": 42.0, "impact": 53.8, "metrics": {"merged_prs": 315, "active_weeks": 14, "reviews_given": 121, "authors_helped": 28, "collaborators": 37, "reviews_received": 115, "reviewers_distinct": 19, "discussion_received": 1433, "additions": 76639, "deletions": 24111, "changed_files": 2356}, "rep_prs": [{"number": 59880, "title": "feat(insights): add BoxPlot chart primitive to hog-charts library", "reviews": 37, "comments": 6}, {"number": 61809, "title": "refactor(insights): use trends line chart in MCP app", "reviews": 32, "comments": 7}, {"number": 60130, "title": "feat(insights): port stickiness bar to hog-charts", "reviews": 31, "comments": 5}]}, {"rank": 10, "login": "Piccirello", "archetype": "The Force Multiplier", "shipping": 45.9, "leverage": 52.3, "influence": 50.7, "impact": 49.6, "metrics": {"merged_prs": 78, "active_weeks": 14, "reviews_given": 142, "authors_helped": 44, "collaborators": 55, "reviews_received": 73, "reviewers_distinct": 32, "discussion_received": 204, "additions": 6279, "deletions": 910, "changed_files": 282}, "rep_prs": [{"number": 61789, "title": "chore(dev): add opt-in filesystem sandbox for dev services", "reviews": 7, "comments": 7}, {"number": 52495, "title": "feat: remove ambiguous characters from PostHog API keys/tokens", "reviews": 11, "comments": 1}, {"number": 61019, "title": "fix(sites): validate site preview URL before rendering", "reviews": 7, "comments": 5}]}, {"rank": 11, "login": "lricoy", "archetype": "The Shipper", "shipping": 51.1, "leverage": 42.5, "influence": 48.4, "impact": 47.3, "metrics": {"merged_prs": 133, "active_weeks": 13, "reviews_given": 134, "authors_helped": 30, "collaborators": 43, "reviews_received": 131, "reviewers_distinct": 24, "discussion_received": 580, "additions": 36206, "deletions": 11706, "changed_files": 759}, "rep_prs": [{"number": 52206, "title": "feat(web-analytics): wrap bot preview functions as virtual event properties", "reviews": 7, "comments": 13}, {"number": 59665, "title": "feat(web-analytics): lazy precomputation for web stats PATHS tile", "reviews": 12, "comments": 8}, {"number": 54506, "title": "perf(web-analytics): add events timestamp prefilter for bounce/scroll subqueries", "reviews": 9, "comments": 9}]}, {"rank": 12, "login": "joshsny", "archetype": "The Force Multiplier", "shipping": 39.9, "leverage": 53.9, "influence": 45.1, "impact": 46.4, "metrics": {"merged_prs": 89, "active_weeks": 11, "reviews_given": 189, "authors_helped": 32, "collaborators": 38, "reviews_received": 135, "reviewers_distinct": 25, "discussion_received": 308, "additions": 26632, "deletions": 3944, "changed_files": 571}, "rep_prs": [{"number": 60745, "title": "chore(signals): move pipeline to use llm gateway", "reviews": 10, "comments": 10}, {"number": 55266, "title": "feat(mcp): add hono version of mcp server", "reviews": 11, "comments": 8}, {"number": 60753, "title": "feat(billing): split signals usage out of PostHog AI usage reporting", "reviews": 12, "comments": 5}]}, {"rank": 13, "login": "adamleithp", "archetype": "The Shipper", "shipping": 50.3, "leverage": 39.3, "influence": 47.9, "impact": 45.8, "metrics": {"merged_prs": 110, "active_weeks": 14, "reviews_given": 101, "authors_helped": 35, "collaborators": 47, "reviews_received": 101, "reviewers_distinct": 32, "discussion_received": 458, "additions": 58098, "deletions": 12438, "changed_files": 1195}, "rep_prs": [{"number": 56666, "title": "feat(insights): scaffold headless TaxonomicFilter behind feature flag", "reviews": 9, "comments": 18}, {"number": 62674, "title": "feat(toolbar): add field notes mode", "reviews": 13, "comments": 13}, {"number": 51488, "title": "feat(quill): intital commit", "reviews": 17, "comments": 5}]}, {"rank": 14, "login": "MattPua", "archetype": "The Shipper", "shipping": 49.0, "leverage": 37.7, "influence": 44.4, "impact": 43.7, "metrics": {"merged_prs": 154, "active_weeks": 11, "reviews_given": 108, "authors_helped": 30, "collaborators": 36, "reviews_received": 142, "reviewers_distinct": 16, "discussion_received": 908, "additions": 87856, "deletions": 35129, "changed_files": 1709}, "rep_prs": [{"number": 60496, "title": "feat(dashboards): add session replay dashboard widget (9/11)", "reviews": 8, "comments": 34}, {"number": 61746, "title": "feat(dashboards): validate and persist widgetFilters on list widgets (1/5)", "reviews": 24, "comments": 12}, {"number": 60497, "title": "feat(dashboards): add MCP tools for dashboard widgets (10/11)", "reviews": 2, "comments": 31}]}, {"rank": 15, "login": "mariusandra", "archetype": "The Connector", "shipping": 35.7, "leverage": 46.7, "influence": 48.0, "impact": 43.2, "metrics": {"merged_prs": 77, "active_weeks": 10, "reviews_given": 134, "authors_helped": 37, "collaborators": 46, "reviews_received": 108, "reviewers_distinct": 25, "discussion_received": 325, "additions": 82727, "deletions": 19489, "changed_files": 1320}, "rep_prs": [{"number": 61108, "title": "feat(hogql): type system proof of concept", "reviews": 22, "comments": 14}, {"number": 47110, "title": "feat(devex): query kind to url", "reviews": 4, "comments": 17}, {"number": 61781, "title": "feat(notebooks): rewrite in markdown", "reviews": 9, "comments": 12}]}, {"rank": 16, "login": "veryayskiy", "archetype": "The Shipper", "shipping": 52.6, "leverage": 25.2, "influence": 52.2, "impact": 42.9, "metrics": {"merged_prs": 126, "active_weeks": 14, "reviews_given": 63, "authors_helped": 23, "collaborators": 47, "reviews_received": 137, "reviewers_distinct": 41, "discussion_received": 479, "additions": 44246, "deletions": 8664, "changed_files": 973}, "rep_prs": [{"number": 58094, "title": "feat(business knowledge): backend", "reviews": 28, "comments": 31}, {"number": 58692, "title": "fix: move tickets email search to ch", "reviews": 13, "comments": 16}, {"number": 58392, "title": "feat(conversations): create ticket", "reviews": 14, "comments": 14}]}, {"rank": 17, "login": "haacked", "archetype": "The Shipper", "shipping": 47.6, "leverage": 33.6, "influence": 47.3, "impact": 42.6, "metrics": {"merged_prs": 108, "active_weeks": 13, "reviews_given": 108, "authors_helped": 23, "collaborators": 40, "reviews_received": 141, "reviewers_distinct": 26, "discussion_received": 347, "additions": 31881, "deletions": 15231, "changed_files": 657}, "rep_prs": [{"number": 52793, "title": "feat(hypercache): add HyperCacheWriter with Redis/S3 dual-write and ETag support", "reviews": 35, "comments": 2}, {"number": 61233, "title": "feat(flags): use a dedicated encryption key for flag payloads", "reviews": 26, "comments": 7}, {"number": 52967, "title": "fix(flags): chunk ClickHouse queries to avoid exceeding max_bytes_to_read limit", "reviews": 26, "comments": 3}]}, {"rank": 18, "login": "sakce", "archetype": "The Shipper", "shipping": 48.8, "leverage": 27.5, "influence": 45.9, "impact": 40.5, "metrics": {"merged_prs": 117, "active_weeks": 13, "reviews_given": 72, "authors_helped": 24, "collaborators": 39, "reviews_received": 135, "reviewers_distinct": 27, "discussion_received": 635, "additions": 34028, "deletions": 9420, "changed_files": 738}, "rep_prs": [{"number": 54878, "title": "feat(streamlit-apps): add sandbox runtime, services, auth proxy", "reviews": 29, "comments": 13}, {"number": 56190, "title": "feat(auth): wire project secret API key auth into EndpointViewSet", "reviews": 15, "comments": 16}, {"number": 60270, "title": "feat(endpoints): expose audit + materialisation tools via mcp", "reviews": 6, "comments": 17}]}, {"rank": 19, "login": "robbie-c", "archetype": "The Shipper", "shipping": 52.0, "leverage": 18.8, "influence": 50.7, "impact": 40.0, "metrics": {"merged_prs": 140, "active_weeks": 13, "reviews_given": 44, "authors_helped": 18, "collaborators": 43, "reviews_received": 150, "reviewers_distinct": 39, "discussion_received": 695, "additions": 112190, "deletions": 42389, "changed_files": 915}, "rep_prs": [{"number": 58665, "title": "fix(hogql): leading zeros are decimal, reject octal 0o, reject bare throw, niche grammar bugs", "reviews": 4, "comments": 42}, {"number": 58949, "title": "feat(hogql): add native Rust HogQL parser (rust-json backend)", "reviews": 6, "comments": 35}, {"number": 58633, "title": "chore(hogql): parser-parity diagnostic tooling in posthog/hogql/scripts/", "reviews": 4, "comments": 29}]}, {"rank": 20, "login": "MarconLP", "archetype": "The Force Multiplier", "shipping": 38.9, "leverage": 52.7, "influence": 24.1, "impact": 39.3, "metrics": {"merged_prs": 82, "active_weeks": 11, "reviews_given": 249, "authors_helped": 11, "collaborators": 15, "reviews_received": 106, "reviewers_distinct": 7, "discussion_received": 377, "additions": 23369, "deletions": 2029, "changed_files": 525}, "rep_prs": [{"number": 48094, "title": "feat(dwh): slack source", "reviews": 27, "comments": 10}, {"number": 59386, "title": "feat(data-warehouse): add Custom REST source backend", "reviews": 17, "comments": 11}, {"number": 47293, "title": "feat(warehouse): add Convex as a data warehouse source", "reviews": 10, "comments": 14}]}, {"rank": 21, "login": "lucasheriques", "archetype": "The Shipper", "shipping": 39.6, "leverage": 36.3, "influence": 39.3, "impact": 38.3, "metrics": {"merged_prs": 69, "active_weeks": 12, "reviews_given": 75, "authors_helped": 38, "collaborators": 45, "reviews_received": 41, "reviewers_distinct": 19, "discussion_received": 436, "additions": 25772, "deletions": 7164, "changed_files": 458}, "rep_prs": [{"number": 58628, "title": "feat(surveys): replace 'Default' translation with explicit base_language", "reviews": 19, "comments": 16}, {"number": 59947, "title": "feat(surveys): make surveys a 1st-class MCP citizen (responses, summarize, list, lifecycle, stats)", "reviews": 23, "comments": 12}, {"number": 58499, "title": "feat(mcp): surface inner exec tool description and bump @posthog/mcp", "reviews": 8, "comments": 19}]}, {"rank": 22, "login": "georgemunyoro", "archetype": "The Force Multiplier", "shipping": 34.1, "leverage": 43.1, "influence": 36.8, "impact": 38.0, "metrics": {"merged_prs": 47, "active_weeks": 11, "reviews_given": 118, "authors_helped": 36, "collaborators": 38, "reviews_received": 65, "reviewers_distinct": 11, "discussion_received": 253, "additions": 63184, "deletions": 37724, "changed_files": 428}, "rep_prs": [{"number": 50353, "title": "feat(hogql): remaining duck/postgres syntax 1/2", "reviews": 5, "comments": 21}, {"number": 49865, "title": "feat(hogql): qualify clause", "reviews": 3, "comments": 20}, {"number": 52426, "title": "fix(hogql): type casting and alias handling", "reviews": 3, "comments": 20}]}, {"rank": 23, "login": "TueHaulund", "archetype": "The Shipper", "shipping": 49.4, "leverage": 29.1, "influence": 35.2, "impact": 38.0, "metrics": {"merged_prs": 103, "active_weeks": 14, "reviews_given": 103, "authors_helped": 17, "collaborators": 23, "reviews_received": 148, "reviewers_distinct": 12, "discussion_received": 450, "additions": 48313, "deletions": 21182, "changed_files": 1415}, "rep_prs": [{"number": 58203, "title": "feat(replay-vision): add CRUD API for lenses and observations", "reviews": 9, "comments": 15}, {"number": 58273, "title": "feat(replay-vision): add /observe/ endpoint and stub ApplyLensWorkflow", "reviews": 7, "comments": 16}, {"number": 55724, "title": "feat(signals): replace hourly clustering with continuous summarization sweep", "reviews": 17, "comments": 3}]}, {"rank": 24, "login": "ablaszkiewicz", "archetype": "The Shipper", "shipping": 43.4, "leverage": 33.2, "influence": 37.5, "impact": 38.0, "metrics": {"merged_prs": 78, "active_weeks": 13, "reviews_given": 112, "authors_helped": 21, "collaborators": 27, "reviews_received": 142, "reviewers_distinct": 13, "discussion_received": 356, "additions": 28553, "deletions": 13736, "changed_files": 593}, "rep_prs": [{"number": 54690, "title": "feat(error-tracking): add recommendations system", "reviews": 29, "comments": 14}, {"number": 60325, "title": "feat: error tracking per issue guard", "reviews": 34, "comments": 3}, {"number": 51230, "title": "feat(error-tracking): persist spike detection events", "reviews": 16, "comments": 15}]}, {"rank": 25, "login": "tatoalo", "archetype": "The Shipper", "shipping": 43.4, "leverage": 37.3, "influence": 31.5, "impact": 37.7, "metrics": {"merged_prs": 96, "active_weeks": 12, "reviews_given": 144, "authors_helped": 18, "collaborators": 23, "reviews_received": 117, "reviewers_distinct": 14, "discussion_received": 375, "additions": 24867, "deletions": 4669, "changed_files": 610}, "rep_prs": [{"number": 58133, "title": "feat(tasks): add sandbox event ingest endpoint", "reviews": 15, "comments": 15}, {"number": 55447, "title": "feat(integrations): cache github repositories and branches", "reviews": 13, "comments": 11}, {"number": 58135, "title": "feat(tasks): gate sandbox event ingest workflow", "reviews": 5, "comments": 14}]}, {"rank": 26, "login": "dmarticus", "archetype": "The Shipper", "shipping": 42.3, "leverage": 29.9, "influence": 40.2, "impact": 37.3, "metrics": {"merged_prs": 88, "active_weeks": 12, "reviews_given": 85, "authors_helped": 24, "collaborators": 36, "reviews_received": 107, "reviewers_distinct": 22, "discussion_received": 390, "additions": 40116, "deletions": 6954, "changed_files": 794}, "rep_prs": [{"number": 58434, "title": "feat(tasks): mobile push notifications for task run state changes", "reviews": 19, "comments": 25}, {"number": 57885, "title": "feat(flags): expose bulk-ops feature flag endpoints as MCP tools", "reviews": 25, "comments": 10}, {"number": 61014, "title": "feat(agents): runtime support for spec.mcps[]", "reviews": 14, "comments": 17}]}, {"rank": 27, "login": "thmsobrmlr", "archetype": "The Shipper", "shipping": 43.4, "leverage": 32.5, "influence": 33.4, "impact": 36.6, "metrics": {"merged_prs": 132, "active_weeks": 10, "reviews_given": 83, "authors_helped": 29, "collaborators": 34, "reviews_received": 62, "reviewers_distinct": 16, "discussion_received": 570, "additions": 33942, "deletions": 29825, "changed_files": 811}, "rep_prs": [{"number": 58407, "title": "feat(mcp-analytics): add mcp analytics", "reviews": 9, "comments": 16}, {"number": 50140, "title": "feat(lifecycle): add data warehouse support", "reviews": 11, "comments": 7}, {"number": 50799, "title": "chore(funnels): add separate dwh node for funnels", "reviews": 7, "comments": 10}]}, {"rank": 28, "login": "fercgomes", "archetype": "The Connector", "shipping": 40.6, "leverage": 27.0, "influence": 42.8, "impact": 36.5, "metrics": {"merged_prs": 76, "active_weeks": 12, "reviews_given": 104, "authors_helped": 13, "collaborators": 35, "reviews_received": 135, "reviewers_distinct": 27, "discussion_received": 412, "additions": 30275, "deletions": 4772, "changed_files": 713}, "rep_prs": [{"number": 55081, "title": "feat(onboarding): add onboarding delegation flow", "reviews": 7, "comments": 32}, {"number": 59062, "title": "feat(wizard): persist CLI wizard runs via REST API", "reviews": 26, "comments": 12}, {"number": 52667, "title": "feat(toolbar): add basic survey support", "reviews": 9, "comments": 13}]}, {"rank": 29, "login": "cat-ph", "archetype": "The Shipper", "shipping": 42.8, "leverage": 30.2, "influence": 34.5, "impact": 35.9, "metrics": {"merged_prs": 92, "active_weeks": 12, "reviews_given": 112, "authors_helped": 16, "collaborators": 23, "reviews_received": 142, "reviewers_distinct": 14, "discussion_received": 376, "additions": 34795, "deletions": 3781, "changed_files": 466}, "rep_prs": [{"number": 56842, "title": "docs: add sourcemap symbolication skill", "reviews": 21, "comments": 10}, {"number": 57866, "title": "feat(error-tracking): add suppressing-noisy-errors skill", "reviews": 15, "comments": 6}, {"number": 57052, "title": "feat(mcp): add issue list/detail/events error tracking tools", "reviews": 4, "comments": 16}]}, {"rank": 30, "login": "yasen-posthog", "archetype": "The Shipper", "shipping": 42.8, "leverage": 26.6, "influence": 38.5, "impact": 35.9, "metrics": {"merged_prs": 74, "active_weeks": 13, "reviews_given": 80, "authors_helped": 20, "collaborators": 35, "reviews_received": 99, "reviewers_distinct": 20, "discussion_received": 403, "additions": 41332, "deletions": 3355, "changed_files": 783}, "rep_prs": [{"number": 50168, "title": "feat(scim): add SCIM request logs viewer for org admins", "reviews": 51, "comments": 8}, {"number": 49313, "title": "feat(notifications): notification popover UI with real-time SSE and toast alerts", "reviews": 11, "comments": 32}, {"number": 56156, "title": "feat(notifications): dispatch pipeline_failure realtime notifications", "reviews": 14, "comments": 12}]}, {"rank": 31, "login": "VojtechBartos", "archetype": "The Shipper", "shipping": 44.1, "leverage": 24.8, "influence": 39.1, "impact": 35.8, "metrics": {"merged_prs": 101, "active_weeks": 12, "reviews_given": 89, "authors_helped": 14, "collaborators": 26, "reviews_received": 162, "reviewers_distinct": 21, "discussion_received": 418, "additions": 73392, "deletions": 35169, "changed_files": 1041}, "rep_prs": [{"number": 51457, "title": "feat(mcp): add logs alerts MCP tools", "reviews": 10, "comments": 19}, {"number": 51177, "title": "feat(mcp): add alerts MCP tools", "reviews": 4, "comments": 22}, {"number": 51757, "title": "feat(mcp): add  session replays MCP tools", "reviews": 11, "comments": 14}]}, {"rank": 32, "login": "dmarchuk", "archetype": "The Shipper", "shipping": 42.0, "leverage": 29.0, "influence": 36.0, "impact": 35.7, "metrics": {"merged_prs": 86, "active_weeks": 12, "reviews_given": 96, "authors_helped": 19, "collaborators": 25, "reviews_received": 142, "reviewers_distinct": 12, "discussion_received": 313, "additions": 12655, "deletions": 3606, "changed_files": 358}, "rep_prs": [{"number": 51875, "title": "feat(workflows): Add recurring schedule support for batch triggers", "reviews": 37, "comments": 14}, {"number": 57847, "title": "feat(cdp): Add hogflow subscription matcher consumer", "reviews": 34, "comments": 8}, {"number": 52941, "title": "feat(workflows): Add recurring schedule picker", "reviews": 11, "comments": 5}]}, {"rank": 33, "login": "eli-r-ph", "archetype": "The Shipper", "shipping": 40.0, "leverage": 30.9, "influence": 34.5, "impact": 35.2, "metrics": {"merged_prs": 72, "active_weeks": 12, "reviews_given": 119, "authors_helped": 15, "collaborators": 22, "reviews_received": 149, "reviewers_distinct": 15, "discussion_received": 175, "additions": 37163, "deletions": 5043, "changed_files": 520}, "rep_prs": [{"number": 52029, "title": "feat(capture): v1 analytics endpoint and processing pipeline (part one)", "reviews": 41, "comments": 1}, {"number": 53643, "title": "feat(capture v1): base Sink abstractions", "reviews": 39, "comments": 2}, {"number": 51553, "title": "feat(rust): GitHub Action to automate Docker Image build + push for feature branches", "reviews": 30, "comments": 3}]}, {"rank": 34, "login": "vdekrijger", "archetype": "The Shipper", "shipping": 42.6, "leverage": 32.1, "influence": 29.1, "impact": 34.9, "metrics": {"merged_prs": 90, "active_weeks": 12, "reviews_given": 116, "authors_helped": 18, "collaborators": 23, "reviews_received": 97, "reviewers_distinct": 13, "discussion_received": 463, "additions": 27510, "deletions": 10332, "changed_files": 677}, "rep_prs": [{"number": 59630, "title": "feat(subscriptions): AI report pipeline primitive (planner, HogQL, synthesis) + sanitization", "reviews": 82, "comments": 8}, {"number": 59631, "title": "feat(subscriptions): scheduled AI delivery via Temporal (email + Slack)", "reviews": 54, "comments": 7}, {"number": 59632, "title": "feat(subscriptions): AI subscription API, validation, telemetry, and UI", "reviews": 37, "comments": 18}]}, {"rank": 35, "login": "arthurdedeus", "archetype": "The Shipper", "shipping": 40.9, "leverage": 30.0, "influence": 32.7, "impact": 34.6, "metrics": {"merged_prs": 78, "active_weeks": 12, "reviews_given": 92, "authors_helped": 22, "collaborators": 30, "reviews_received": 82, "reviewers_distinct": 20, "discussion_received": 443, "additions": 39585, "deletions": 14497, "changed_files": 715}, "rep_prs": [{"number": 58154, "title": "feat(customer-analytics): Create Account model with typed properties and group attachment", "reviews": 9, "comments": 14}, {"number": 58155, "title": "feat(customer-analytics): Add account CRUD API", "reviews": 7, "comments": 14}, {"number": 62783, "title": "feat(customer-analytics): Notify account owners of usage spikes", "reviews": 13, "comments": 8}]}, {"rank": 36, "login": "orian", "archetype": "The Connector", "shipping": 37.0, "leverage": 29.7, "influence": 37.3, "impact": 34.5, "metrics": {"merged_prs": 50, "active_weeks": 12, "reviews_given": 68, "authors_helped": 29, "collaborators": 39, "reviews_received": 63, "reviewers_distinct": 16, "discussion_received": 197, "additions": 12487, "deletions": 2636, "changed_files": 394}, "rep_prs": [{"number": 58308, "title": "fix: properly parse and validate list[int] instance settings", "reviews": 3, "comments": 13}, {"number": 57981, "title": "feat(clickhouse): rich clickhouse test setup", "reviews": 5, "comments": 8}, {"number": 59531, "title": "feat(data-deletion): add person_properties field to DataDeletionRequest", "reviews": 4, "comments": 8}]}, {"rank": 37, "login": "a-lider", "archetype": "The Shipper", "shipping": 46.3, "leverage": 24.3, "influence": 32.4, "impact": 34.4, "metrics": {"merged_prs": 81, "active_weeks": 14, "reviews_given": 77, "authors_helped": 17, "collaborators": 26, "reviews_received": 105, "reviewers_distinct": 16, "discussion_received": 396, "additions": 12640, "deletions": 2221, "changed_files": 429}, "rep_prs": [{"number": 54470, "title": "feat: inbound webhook for Customer.io opt-outs", "reviews": 11, "comments": 15}, {"number": 54572, "title": "feat: sync opt-outs from posthog to Customer.io", "reviews": 10, "comments": 14}, {"number": 59288, "title": "feat(notebooks): MCP notebook-edit tool for collaborative editing", "reviews": 8, "comments": 12}]}, {"rank": 38, "login": "jurajmajerik", "archetype": "The Shipper", "shipping": 44.2, "leverage": 28.2, "influence": 28.6, "impact": 33.9, "metrics": {"merged_prs": 120, "active_weeks": 11, "reviews_given": 98, "authors_helped": 17, "collaborators": 24, "reviews_received": 86, "reviewers_distinct": 15, "discussion_received": 430, "additions": 17479, "deletions": 6036, "changed_files": 538}, "rep_prs": [{"number": 58437, "title": "feat(experiments): experiments for llm prompts", "reviews": 7, "comments": 8}, {"number": 52680, "title": "feat(experiments): Add 'only count matured users' option for experiment metrics", "reviews": 4, "comments": 9}, {"number": 51277, "title": "fix(experiments): Disable duplication for legacy metric experiments", "reviews": 3, "comments": 9}]}, {"rank": 39, "login": "hpouillot", "archetype": "The Connector", "shipping": 35.2, "leverage": 30.1, "influence": 35.8, "impact": 33.6, "metrics": {"merged_prs": 73, "active_weeks": 10, "reviews_given": 102, "authors_helped": 19, "collaborators": 28, "reviews_received": 121, "reviewers_distinct": 17, "discussion_received": 284, "additions": 28570, "deletions": 6124, "changed_files": 660}, "rep_prs": [{"number": 58507, "title": "feat(experiment): add endpoints and ui for prompt experiments", "reviews": 13, "comments": 19}, {"number": 52593, "title": "feat(error-tracking): exception steps and adaptive loading", "reviews": 14, "comments": 12}, {"number": 54884, "title": "refactor(error_tracking): move external references to presentation", "reviews": 6, "comments": 17}]}, {"rank": 40, "login": "MattBro", "archetype": "The Shipper", "shipping": 46.3, "leverage": 15.4, "influence": 39.3, "impact": 33.4, "metrics": {"merged_prs": 117, "active_weeks": 12, "reviews_given": 48, "authors_helped": 11, "collaborators": 18, "reviews_received": 215, "reviewers_distinct": 11, "discussion_received": 477, "additions": 23599, "deletions": 4826, "changed_files": 580}, "rep_prs": [{"number": 53493, "title": "feat: make agentic provisioning multi-tenant with ProvisioningPartner model", "reviews": 31, "comments": 11}, {"number": 55620, "title": "feat(provisioning): cimd verification tokens for partner-org linking", "reviews": 24, "comments": 13}, {"number": 61711, "title": "feat(oauth): app-wide session revoke + refresh narrowing tests", "reviews": 19, "comments": 8}]}]};
+const PILLARS=[
+  {key:'shipping',name:'Shipping',color:'var(--ship)',w:0.35,
+   q:'Do they reliably land meaningful work?',
+   m:'merged PRs (65%) + active weeks (35%)'},
+  {key:'leverage',name:'Leverage',color:'var(--lev)',w:0.35,
+   q:'Do they multiply the team?',
+   m:'PRs reviewed for others (60%) + distinct teammates helped (40%)'},
+  {key:'influence',name:'Influence',color:'var(--inf)',w:0.30,
+   q:'Does the team depend on them?',
+   m:'distinct collaborators (55%) + review engagement their PRs attract (45%)'},
+];
+const PCOLOR={shipping:'#2f6fed',leverage:'#16a34a',influence:'#8b3df5'};
+const COLORS=['#f54e00','#2f6fed','#16a34a','#8b3df5','#0ea5e9','#e11d48','#d97706','#7c3aed'];
+let weights={shipping:0.35,leverage:0.35,influence:0.30};
+
+const ghUser=l=>`https://github.com/${l}`;
+const ghPR=n=>`https://github.com/${DATA.meta.repo}/pull/${n}`;
+const avatar=l=>`https://github.com/${l}.png?size=96`;
+const initials=l=>l.replace(/[^a-zA-Z0-9]/g,'').slice(0,2).toUpperCase();
+const colorFor=l=>{let h=0;for(const c of l)h=(h*31+c.charCodeAt(0))>>>0;return `hsl(${h%360} 55% 55%)`;};
+
+function finalScore(e){
+  const s=weights.shipping+weights.leverage+weights.influence||1;
+  return (weights.shipping*e.shipping+weights.leverage*e.leverage+weights.influence*e.influence)/s;
+}
+function ranked(){
+  return DATA.leaderboard.map(e=>({...e,_f:finalScore(e)}))
+    .sort((a,b)=>b._f-a._f).map((e,i)=>({...e,_rank:i+1}));
+}
+
+function meta(){
+  const m=DATA.meta, d=new Date(m.collected_at);
+  const fmt=t=>new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const start=new Date(d); start.setDate(start.getDate()-m.window_days);
+  document.getElementById('meta').innerHTML=
+    `<span class="chip">📦 <b>${m.repo}</b></span>`+
+    `<span class="chip">🗓 last <b>${m.window_days}</b> days · ${fmt(start)}–${fmt(d)}</span>`+
+    `<span class="chip">🔀 <b>${m.total_merged_prs.toLocaleString()}</b> merged PRs</span>`+
+    `<span class="chip">🧑‍💻 <b>${m.total_engineers}</b> engineers</span>`;
+}
+
+function pillarsUI(){
+  document.getElementById('pillars').innerHTML=PILLARS.map(p=>`
+    <div class="pill" data-k="${p.key}" title="Scored from: ${p.m}">
+      <span class="wt" id="wt-${p.key}"></span>
+      <div class="nm"><i style="background:${p.color}"></i>${p.name}</div>
+      <div class="ds"><b>${p.q}</b><br>${p.m}</div>
+    </div>`).join('');
+  document.querySelectorAll('.pill').forEach(el=>el.onclick=()=>{
+    const k=el.dataset.k; weights={shipping:0,leverage:0,influence:0}; weights[k]=1;
+    syncSliders(); render();
+  });
+}
+function slidersUI(){
+  document.getElementById('sliders').innerHTML=PILLARS.map(p=>`
+    <div class="srow">
+      <label><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${p.color};margin-right:5px"></i>${p.name}</label>
+      <input type="range" min="0" max="100" value="${p.w*100}" data-k="${p.key}">
+      <output id="o-${p.key}"></output>
+    </div>`).join('');
+  document.querySelectorAll('#sliders input').forEach(inp=>inp.oninput=()=>{
+    weights[inp.dataset.k]=+inp.value/100; render();
+  });
+}
+function syncSliders(){
+  document.querySelectorAll('#sliders input').forEach(inp=>inp.value=weights[inp.dataset.k]*100);
+}
+function pct(){
+  const s=weights.shipping+weights.leverage+weights.influence||1;
+  return {shipping:Math.round(weights.shipping/s*100),leverage:Math.round(weights.leverage/s*100),influence:Math.round(weights.influence/s*100)};
+}
+
+function card(e){
+  const p=pct();
+  const contrib=`${p.shipping}%·${e.shipping.toFixed(0)} + ${p.leverage}%·${e.leverage.toFixed(0)} + ${p.influence}%·${e.influence.toFixed(0)}`;
+  const m=e.metrics;
+  const bar=(k,nm)=>`<div class="bar"><span class="bi" style="color:${PCOLOR[k]}">${nm}</span>
+    <div class="track"><div class="fill" style="width:${e[k]}%;background:${PCOLOR[k]}"></div></div>
+    <span class="bv">${e[k].toFixed(0)}</span></div>`;
+  const prs=(e.rep_prs||[]).slice(0,2).map(r=>
+    `<a href="${ghPR(r.number)}" target="_blank" title="${r.title.replace(/"/g,'&quot;')} · ${r.reviews} reviews, ${r.comments} comments">#${r.number} ${r.title}</a>`).join('');
+  return `<div class="eng">
+    <span class="rk">#${e._rank}</span>
+    <div class="who">
+      <img class="av" src="${avatar(e.login)}" alt="" onerror="this.outerHTML='<div class=&quot;avf&quot; style=&quot;background:${colorFor(e.login)}&quot;>${initials(e.login)}</div>'">
+      <div><a class="nm" href="${ghUser(e.login)}" target="_blank">${e.login}</a>
+      <div class="ar">${e.archetype}</div></div>
+    </div>
+    <div class="scoreline" title="weighted: ${contrib}">
+      <span class="big" style="color:var(--accent)">${e._f.toFixed(0)}</span><span class="of">/100</span>
+      <span class="lbl">impact</span>
+    </div>
+    <div class="bars">${bar('shipping','S')}${bar('leverage','L')}${bar('influence','I')}</div>
+    <div class="stats">
+      <span class="stat"><b>${m.merged_prs}</b> PRs · <b>${m.active_weeks}</b>w</span>
+      <span class="stat"><b>${m.reviews_given}</b> reviews → <b>${m.authors_helped}</b> ppl</span>
+      <span class="stat"><b>${m.collaborators}</b> collaborators</span>
+    </div>
+    <div class="prs"><span class="pl">shipped, by engagement</span>${prs}</div>
+  </div>`;
+}
+
+function restRow(e){
+  const tot=Math.max(e.shipping*weights.shipping+e.leverage*weights.leverage+e.influence*weights.influence,0.001);
+  const seg=(k)=>`<span style="width:${(e[k]*weights[k]/tot*100)}%;background:${PCOLOR[k]}"></span>`;
+  return `<div class="rrow">
+    <span class="rn">${e._rank}</span>
+    <div class="who2">
+      <img class="av2" src="${avatar(e.login)}" alt="" onerror="this.style.visibility='hidden'">
+      <a class="nm" href="${ghUser(e.login)}" target="_blank">${e.login}</a>
+    </div>
+    <div class="compbar" title="S ${e.shipping.toFixed(0)} · L ${e.leverage.toFixed(0)} · I ${e.influence.toFixed(0)}">${seg('shipping')}${seg('leverage')}${seg('influence')}</div>
+    <span class="sc">${e._f.toFixed(0)}</span>
+  </div>`;
+}
+
+function footer(){
+  const m=DATA.meta;
+  document.getElementById('foot').innerHTML=`
+    <details><summary>Methodology &amp; how to validate these numbers</summary>
+    <div style="margin-top:8px;max-width:900px">
+    <b>Data.</b> Every pull request <b>merged into <code>${m.repo}</code> in the last ${m.window_days} days</b>
+    (${m.total_merged_prs.toLocaleString()} PRs), pulled from the GitHub GraphQL API with their full review graph.
+    Automated accounts (bots) are excluded. ${m.total_engineers} human engineers authored or reviewed merged work.<br><br>
+    <b>The three pillars.</b> Each engineer gets a 0–100 score in each pillar, where <b>100 = the strongest engineer in
+    that dimension</b> (every raw number is shown on the card so you can check it):<br>
+    • <b style="color:var(--ship)">Shipping</b> = merged PRs (65%) + distinct active weeks (35%) — landing real work, consistently.<br>
+    • <b style="color:var(--lev)">Leverage</b> = PRs they reviewed for others (60%) + distinct teammates helped (40%) — unblocking the team.<br>
+    • <b style="color:var(--inf)">Influence</b> = distinct review collaborators (55%) + review engagement their PRs attract (45%) — being depended on.<br><br>
+    <b>Impact score</b> = weighted blend of the three (default 35/35/30). Collaboration (Leverage+Influence) is weighted 65%
+    on purpose — to reward force-multipliers, not just prolific committers. <b>Lines of code are never scored</b>; they are a poor
+    proxy for impact. Use the sliders above to apply your own weighting and see how stable the top 5 is.<br><br>
+    <b>Honest limits.</b> Review/PR activity captures collaboration that happens <i>on GitHub</i>; deep design work, incident
+    response, and mentorship that lives in Slack/docs/Linear won't fully show up. Treat this as a strong, validatable
+    starting point for a conversation — not a verdict.
+    </div></details>`;
+}
+
+function render(){
+  const r=ranked();
+  const p=pct();
+  PILLARS.forEach(x=>{document.getElementById('wt-'+x.key).textContent=p[x.key]+'%';
+                      document.getElementById('o-'+x.key).textContent=p[x.key]+'%';});
+  document.getElementById('top5').innerHTML=r.slice(0,5).map(card).join('');
+  document.getElementById('rest').innerHTML=r.slice(5,13).map(restRow).join('');
+}
+document.getElementById('reset').onclick=()=>{weights={shipping:0.35,leverage:0.35,influence:0.30};syncSliders();render();};
+
+meta();pillarsUI();slidersUI();footer();render();
+</script>
+</body>
+</html>
