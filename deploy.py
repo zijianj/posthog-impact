@@ -15,11 +15,14 @@ def api(method, path, body=None):
     req = urllib.request.Request(url, data=data, method=method, headers={
         "Authorization": f"token {TOKEN}", "Accept": "application/vnd.github+json",
         "User-Agent": "ph-deploy", "Content-Type": "application/json"})
+    def parse(resp):
+        raw = resp.read()
+        return json.loads(raw) if raw.strip() else {}
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
-            return r.status, json.load(r)
+            return r.status, parse(r)
     except urllib.error.HTTPError as e:
-        return e.code, json.load(e)
+        return e.code, parse(e)
 
 
 def sh(*args, check=True):
