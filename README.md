@@ -1,6 +1,6 @@
 # Who moves PostHog forward? — Engineering Impact Dashboard
 
-**Live dashboard:** _(deployed via GitHub Pages — see below)_
+**▶ Live dashboard: https://zijianj.github.io/posthog-impact/**
 
 An interactive, single-screen dashboard that ranks the **5 most impactful engineers**
 in [`posthog/posthog`](https://github.com/posthog/posthog) over the **last 90 days** —
